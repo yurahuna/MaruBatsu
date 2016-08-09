@@ -1,0 +1,15 @@
+.box {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    padding: 7px;
+    border-radius: 5px;
+    box-shadow: 0 4px 0 #0088cc;
+    color: #fff;
+    background: #00aaff;
+    cursor: pointer;
+}
+
+.box.empty {
+    opacity: 1.0;
+}
