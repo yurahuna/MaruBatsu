@@ -8,19 +8,30 @@
 <body>
     <h1>丸と†罰†</h1>
     <div id="board"></div>
+    <div id="start" class="btn active">start</div>
     <script>
         (function() {
             "use strict";
 
-            makeBoard();
-            let num_empty = 9;
+            const startBtn = document.getElementById("start");
 
-            function makeBoard() {
+            // 盤面の状態を保持するオブジェクト
+            // 盤面:
+            // 0 1 2
+            // 3 4 5
+            // 6 7 8
+            let state = {
+                board: [],          // 各マスの状態
+                num_empty: 0,       // 空きマスの数
+                running: false,     // ゲームが進行中ならばtrue
+            };
+
+            (function init() {
                 // 盤面自体を生成
                 let board = "<table>";
                 for (let i = 0; i < 9; ++i) {
                     if (i % 3 == 0) board += "<tr>";
-                    board += "<td><div id=" + i + " class=\"box empty\"></div></td>";
+                    board += "<td><div id=" + i + "></div></td>";
                     if (i % 3 == 2) board += "</tr>";
                 }
                 board += "</table>";
@@ -28,23 +39,66 @@
 
                 // 各マスに、クリックされたときのEventListenerをつける
                 for (let i = 0; i < 9; ++i) {
-                    let box = document.getElementById(i);
+                    const box = document.getElementById(i);
                     box.addEventListener('click', function() {
-                        if (box.className !== "box empty") return;
-                        box.className = "box maru";
-                        box.innerHTML = "o";
-                        --num_empty;
-                        nxtTurn();
+                        if (!state.running) return;
+                        // 書き込みに成功したら次の処理へ
+                        if (setState(i, "o"))
+                            nxtTurn();
                     });
                 }
+
+                // 盤面の初期化
+                clearBoard();
+
+                // ボタンにイベントリスナーをつける
+                document.getElementById('start').addEventListener('click', function() {
+                    clearBoard();
+                    changeRunning();
+                });
+            })();
+
+            function clearBoard() {
+                // 盤面をまっさらにする
+                for (let i = 0; i < 9; ++i)
+                    setState(i, "");
+                // 検証用
+                if (state.num_empty !== 9)
+                    console.log("!!num_empty is wrong!!");
+            }
+
+            // runningの状態を反転させる
+            function changeRunning() {
+                state.running = !state.running;
+                startBtn.className = state.running ? "btn inactive" : "btn active";
+            }
+
+            // 位置iに文字chrを書き込む
+            // 書き込みに成功したらtrueを返す
+            function setState(i, chr) {
+                // 空でないマスに空文字以外を書き込もうとしたらアウト
+                if (chr !== "" && state.board[i] !== "")
+                    return false;
+                if (chr === "" && state.board[i] !== "")
+                    state.num_empty++;
+                if (chr !== "" && state.board[i] === "")
+                    state.num_empty--;
+
+                state.board[i] = chr;
+                const box = document.getElementById(i);
+                box.className = "box " + (chr === "" ? "empty" : chr);
+                box.innerHTML = chr;
+
+                // console.log(state.board);
+                // console.log(state.num_empty);
+                return true;
             }
 
             function nxtTurn() {
-                console.log(num_empty);
                 if (checkWins("o")) {
                     finishGame("maru wins!");
                     return;
-                } else if (num_empty === 0) {
+                } else if (state.num_empty === 0) {
                     // 勝敗が決まらないまますべてのマスが埋まったら引き分け
                     finishGame("draw");
                     return;
@@ -60,47 +114,29 @@
                 // 空いてるとこにランダムに置くだけ
                 while (true) {
                     let i = Math.floor(Math.random() * 9);
-                    let box = document.getElementById(i);
-                    if (box.className === "box empty") {
-                        box.className = "box batsu";
-                        box.innerHTML = "x";
-                        --num_empty;
+                    // 書き込みに成功したら次の処理へ
+                    if (setState(i, "x"))
                         return;
-                    }
                 }
             }
 
             function checkWins(player) {
-                let a = []; // 各マスの状態を持つ配列
-                for (let i = 0; i < 9; ++i) {
-                    a.push(document.getElementById(i).innerHTML);
-                }
-                console.log(a);
                 // タテ・ヨコ・ナナメのどれかに3つ自分の駒がそろっていれば勝ち
-                if (a[0] === player && a[0] === a[1] && a[0] === a[2]) return true;
-                if (a[3] === player && a[3] === a[4] && a[3] === a[5]) return true;
-                if (a[6] === player && a[6] === a[7] && a[6] === a[8]) return true;
-                if (a[0] === player && a[0] === a[3] && a[0] === a[6]) return true;
-                if (a[1] === player && a[1] === a[4] && a[1] === a[7]) return true;
-                if (a[2] === player && a[2] === a[5] && a[2] === a[8]) return true;
-                if (a[0] === player && a[0] === a[4] && a[0] === a[8]) return true;
-                if (a[2] === player && a[2] === a[4] && a[2] === a[6]) return true;
+                if (state.board[0] === player && state.board[1] === player && state.board[2] === player) return true;
+                if (state.board[3] === player && state.board[4] === player && state.board[5] === player) return true;
+                if (state.board[6] === player && state.board[7] === player && state.board[8] === player) return true;
+                if (state.board[0] === player && state.board[3] === player && state.board[6] === player) return true;
+                if (state.board[1] === player && state.board[4] === player && state.board[7] === player) return true;
+                if (state.board[2] === player && state.board[5] === player && state.board[8] === player) return true;
+                if (state.board[0] === player && state.board[4] === player && state.board[8] === player) return true;
+                if (state.board[2] === player && state.board[4] === player && state.board[6] === player) return true;
                 return false;
             }
 
             function finishGame(result) {
                 console.log(result);
+                changeRunning();
                 // initBoard();
-            }
-
-            function initBoard() {
-                // 盤面をまっさらにする
-                for (let i = 0; i < 9; ++i) {
-                    let box = document.getElementById(i);
-                    box.className = "box empty";
-                    box.innerHTML = "";
-                }
-                num_empty = 9;
             }
 
         })();
