@@ -53,7 +53,7 @@
 
                 // ボタンにイベントリスナーをつける
                 document.getElementById('start').addEventListener('click', function() {
-                    // btnがinactiveの時は押しちゃダメ
+                    // btn が inactive の時は押しちゃダメ
                     if (state.running) return;
                     clearBoard();
                     changeRunning();
@@ -98,16 +98,16 @@
 
             function nxtTurn() {
                 if (checkWins("o")) {
-                    finishGame("maru wins!");
+                    finishGame("o");
                     return;
                 } else if (state.num_empty === 0) {
                     // 勝敗が決まらないまますべてのマスが埋まったら引き分け
-                    finishGame("draw");
+                    finishGame("");
                     return;
                 }
                 playBatsu();
                 if (checkWins("x")) {
-                    finishGame("batsu wins...");
+                    finishGame("x");
                     return;
                 }
             }
@@ -123,22 +123,54 @@
             }
 
             function checkWins(player) {
+                const lines = [
+                    [0, 1, 2],
+                    [3, 4, 5],
+                    [6, 7, 8],
+                    [0, 3, 6],
+                    [1, 4, 7],
+                    [2, 5, 8],
+                    [0, 4, 8],
+                    [2, 4, 6]
+                ];
                 // タテ・ヨコ・ナナメのどれかに3つ自分の駒がそろっていれば勝ち
-                if (state.board[0] === player && state.board[1] === player && state.board[2] === player) return true;
-                if (state.board[3] === player && state.board[4] === player && state.board[5] === player) return true;
-                if (state.board[6] === player && state.board[7] === player && state.board[8] === player) return true;
-                if (state.board[0] === player && state.board[3] === player && state.board[6] === player) return true;
-                if (state.board[1] === player && state.board[4] === player && state.board[7] === player) return true;
-                if (state.board[2] === player && state.board[5] === player && state.board[8] === player) return true;
-                if (state.board[0] === player && state.board[4] === player && state.board[8] === player) return true;
-                if (state.board[2] === player && state.board[4] === player && state.board[6] === player) return true;
+                for (let i = 0; i < lines.length; ++i) {
+                    if (checkLine(lines[i], player)) {
+                        paintLine(lines[i]);
+                        return true;
+                    }
+                }
+
+                // if (state.board[0] === player && state.board[1] === player && state.board[2] === player) return true;
+                // if (state.board[3] === player && state.board[4] === player && state.board[5] === player) return true;
+                // if (state.board[6] === player && state.board[7] === player && state.board[8] === player) return true;
+                // if (state.board[0] === player && state.board[3] === player && state.board[6] === player) return true;
+                // if (state.board[1] === player && state.board[4] === player && state.board[7] === player) return true;
+                // if (state.board[2] === player && state.board[5] === player && state.board[8] === player) return true;
+                // if (state.board[0] === player && state.board[4] === player && state.board[8] === player) return true;
+                // if (state.board[2] === player && state.board[4] === player && state.board[6] === player) return true;
                 return false;
             }
 
-            function finishGame(result) {
-                console.log(result);
+            // line上にplayerのコマが揃っていればtrue
+            function checkLine(line, player) {
+                for (let j = 0; j < line.length; ++j) {
+                    if (state.board[line[j]] !== player)
+                        return false;
+                }
+                return true;
+            }
+
+            // line上をplayerに対応した色で塗る
+            function paintLine(line, player) {
+                line.forEach(function(pos) {
+                    document.getElementById(pos).className += " line";
+                });
+            }
+
+            function finishGame(winner) {
+                console.log(winner === "" ? "draw" : winner + " wins!");
                 changeRunning();
-                // initBoard();
             }
 
         })();
