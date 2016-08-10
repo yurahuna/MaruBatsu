@@ -2,13 +2,15 @@
 <html lang="ja">
 <head>
     <meta charset="utf8">
-    <title>丸と†罰†</title>
+    <title>○× Time Attack</title>
     <link rel="stylesheet" href="mystyle.css">
 </head>
 <body>
-    <h1>丸と†罰†</h1>
+    <h1>○× Time Attack</h1>
     <div id="board"></div>
+    <div id="result">Win: 0 Lose: 0 Draw: 0</div>
     <div id="start" class="btn active">start</div>
+
     <script>
         (function() {
             "use strict";
@@ -19,8 +21,7 @@
             const TIME_LIMIT = 10000;   // msec;
             const TIME_WAIT = 100;      // ラウンドの結果を一時的に表示する時間の長さ
             let tid_round;
-
-            let cnt_win = 0;    // 勝利回数
+            let cnt_win = 0, cnt_lose = 0, cnt_draw = 0;
 
             // 盤面の状態を保持するオブジェクト
             // 盤面:
@@ -62,6 +63,8 @@
                 document.getElementById('start').addEventListener('click', function() {
                     // btn が inactive の時は押しちゃダメ
                     if (state.running) return;
+                    cnt_win = 0; cnt_lose = 0; cnt_draw = 0;
+                    updateResult();
                     clearBoard();
                     changeRunning(true);
                     // TIME_LIMITミリ秒経過したら終了
@@ -171,10 +174,21 @@
             function finishRound(winner) {
                 state.running = false;
                 console.log(winner === "" ? "draw" : winner + " wins!");
+                switch (winner) {
+                    case "o": cnt_win++; break;
+                    case "x": cnt_lose++; break;
+                    case "":  cnt_draw++; break;
+                }
+                updateResult();
                 tid_round = setTimeout(function() {
                     clearBoard();
                     state.running = true;
                 }, TIME_WAIT);
+            }
+
+            function updateResult() {
+                document.getElementById("result").innerHTML
+                 = "Win: " + cnt_win + " Lose: " + cnt_lose + " Draw: " + cnt_draw;
             }
 
             function finishGame() {
