@@ -53,6 +53,8 @@
 
                 // ボタンにイベントリスナーをつける
                 document.getElementById('start').addEventListener('click', function() {
+                    // btnがinactiveの時は押しちゃダメ
+                    if (state.running) return;
                     clearBoard();
                     changeRunning();
                 });
