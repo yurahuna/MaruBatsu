@@ -13,7 +13,14 @@
         (function() {
             "use strict";
 
+            // game は round の繰り返し
+
             const startBtn = document.getElementById("start");
+            const TIME_LIMIT = 10000;   // msec;
+            const TIME_WAIT = 100;      // ラウンドの結果を一時的に表示する時間の長さ
+            let tid_round;
+
+            let cnt_win = 0;    // 勝利回数
 
             // 盤面の状態を保持するオブジェクト
             // 盤面:
@@ -51,12 +58,17 @@
                 // 盤面の初期化
                 clearBoard();
 
-                // ボタンにイベントリスナーをつける
+                // startボタンにイベントリスナーをつける
                 document.getElementById('start').addEventListener('click', function() {
                     // btn が inactive の時は押しちゃダメ
                     if (state.running) return;
                     clearBoard();
-                    changeRunning();
+                    changeRunning(true);
+                    // TIME_LIMITミリ秒経過したら終了
+                    setTimeout(function() {
+                        clearTimeout(tid_round);    // 結果の一時表示中なら盤面は消さない
+                        finishGame();
+                    }, TIME_LIMIT);
                 });
             })();
 
@@ -69,9 +81,9 @@
                     console.log("!!num_empty is wrong!!");
             }
 
-            // runningの状態を反転させる
-            function changeRunning() {
-                state.running = !state.running;
+            // runningの状態をvalにする
+            function changeRunning(val) {
+                state.running = val;
                 startBtn.className = state.running ? "btn inactive" : "btn active";
             }
 
@@ -90,24 +102,21 @@
                 const box = document.getElementById(i);
                 box.className = "box " + (chr === "" ? "empty" : chr);
                 box.innerHTML = chr;
-
-                // console.log(state.board);
-                // console.log(state.num_empty);
                 return true;
             }
 
             function nxtTurn() {
                 if (checkWins("o")) {
-                    finishGame("o");
+                    finishRound("o");
                     return;
                 } else if (state.num_empty === 0) {
                     // 勝敗が決まらないまますべてのマスが埋まったら引き分け
-                    finishGame("");
+                    finishRound("");
                     return;
                 }
                 playBatsu();
                 if (checkWins("x")) {
-                    finishGame("x");
+                    finishRound("x");
                     return;
                 }
             }
@@ -140,15 +149,6 @@
                         return true;
                     }
                 }
-
-                // if (state.board[0] === player && state.board[1] === player && state.board[2] === player) return true;
-                // if (state.board[3] === player && state.board[4] === player && state.board[5] === player) return true;
-                // if (state.board[6] === player && state.board[7] === player && state.board[8] === player) return true;
-                // if (state.board[0] === player && state.board[3] === player && state.board[6] === player) return true;
-                // if (state.board[1] === player && state.board[4] === player && state.board[7] === player) return true;
-                // if (state.board[2] === player && state.board[5] === player && state.board[8] === player) return true;
-                // if (state.board[0] === player && state.board[4] === player && state.board[8] === player) return true;
-                // if (state.board[2] === player && state.board[4] === player && state.board[6] === player) return true;
                 return false;
             }
 
@@ -168,9 +168,18 @@
                 });
             }
 
-            function finishGame(winner) {
+            function finishRound(winner) {
+                state.running = false;
                 console.log(winner === "" ? "draw" : winner + " wins!");
-                changeRunning();
+                tid_round = setTimeout(function() {
+                    clearBoard();
+                    state.running = true;
+                }, TIME_WAIT);
+            }
+
+            function finishGame() {
+                console.log("Time Up!");
+                changeRunning(false);
             }
 
         })();
