@@ -1,2 +1,3 @@
-# MaruBatsu
-JSの習作で作っている○×ゲーム。
+# oxTimeAttack
+JavaScriptの習作で作った○×ゲーム。
+10秒間で何回AIに勝てるかを競います。
