@@ -13,8 +13,11 @@
         <div id="board"></div>
         <div id="result">Win: 0 Lose: 0 Draw: 0</div>
         <div id="start" class="btn active">start</div>
-        <p>(Press or Space Key)</p>
-        <div id="twbtn"></div>  <!-- TODO: 予め領域を確保しておく -->
+        <div>(Press or Space Key)</div>
+        <div id="twbtn"></div>
+        <p>10秒間○×ゲームで勝ちまくるだけのゲームです</p>
+        <p>あなたが常に先手(○)です</p>
+        <p>キーボード操作もできます</p>
         <p>アルファベットキー
             <table border="1">
                 <tbody>
@@ -30,7 +33,7 @@
                 </tbody>
             </table>
         </p>
-        <p>テンキー(効かない場合はNumLockをオンに)
+        <p>テンキー(NumLock注意)
             <table border="1">
                 <tbody>
                     <tr>
@@ -45,49 +48,6 @@
                 </tbody>
             </table>
         </p>
-        <!-- <ul>
-            <li>10秒間○×ゲームで勝ちまくるだけのゲームです</li>
-            <li>あなたが常に先手(○)です</li>
-            <li>キーボード操作もできます
-                <ul>
-                    <li>Spaceキー: スタート</li>
-                    <li>マスとの対応:
-                        <ul>
-                            <li>アルファベットキー
-                                <table border="1">
-                                    <tbody>
-                                        <tr>
-                                            <td>Q</td><td>W</td><td>E</td>
-                                        </tr>
-                                        <tr>
-                                            <td>A</td><td>S</td><td>D</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Z</td><td>X</td><td>C</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </li>
-                            <li>テンキー(効かない場合はNumLockをオンに)
-                                <table border="1">
-                                    <tbody>
-                                        <tr>
-                                            <td>7</td><td>8</td><td>9</td>
-                                        </tr>
-                                        <tr>
-                                            <td>4</td><td>5</td><td>6</td>
-                                        </tr>
-                                        <tr>
-                                            <td>1</td><td>2</td><td>3</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </li>
-        </ul> -->
     </CENTER>
     <script>
         (function() {
@@ -181,9 +141,9 @@
                 // 盤面をまっさらにする
                 for (let i = 0; i < 9; ++i)
                     setState(i, "");
-                // 検証用
-                if (state.num_empty !== 9)
-                    console.log("!!num_empty is wrong!!");
+                // // 検証用
+                // if (state.num_empty !== 9)
+                //     console.log("!!num_empty is wrong!!");
             }
 
             // runningの状態をvalにする
@@ -275,7 +235,7 @@
 
             function finishRound(winner) {
                 state.running = false;
-                console.log(winner === "" ? "draw" : winner + " wins!");
+                // console.log(winner === "" ? "draw" : winner + " wins!");
                 switch (winner) {
                     case "o": cnt_win++; break;
                     case "x": cnt_lose++; break;
@@ -294,13 +254,13 @@
             }
 
             function finishGame() {
-                console.log("Time Up!");
+                // console.log("Time Up!");
                 changeRunning(false);
                 // tweet内容の書き換え
                 // 参考: http://qiita.com/hidesuke/items/5234fd3b19061a53fcbd の最後
                 (function(){
-                    let text = "10秒で" + cnt_win + "勝" + cnt_lose + "敗" + cnt_draw + "分しました！";
-                    var button = '<a href="https://twitter.com/share" class="twitter-share-button" data-text="' + text +'" data-lang="ja" data-hashtags="oxTimeAttack">ツイート</a>';
+                    const text = "10秒で" + cnt_win + "勝" + cnt_lose + "敗" + cnt_draw + "分しました！";
+                    const button = '<a href="https://twitter.com/share" class="twitter-share-button" data-text="' + text +'" data-lang="ja" data-hashtags="oxTimeAttack">ツイート</a>';
                     $('#twbtn').html(button);
                     twttr.widgets.load();
                 })();
