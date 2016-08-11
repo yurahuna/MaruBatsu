@@ -1,3 +1,7 @@
+body {
+    background: #ddd;
+}
+
 .box {
     display: inline-block;
     width: 20px;
@@ -10,9 +14,21 @@
     cursor: pointer;
 }
 
+.box.o.line {
+    background: red;
+}
+
+.box.x.line {
+    background: blue;
+}
+
+#result {
+    margin: 10px;
+}
+
 .btn {
     display: inline-block;
-    margin-top: 20px;
+    margin: 10px;
     width: 40px;
     height: 20px;
     padding: 7px;
@@ -28,4 +44,17 @@
 }
 .btn.inactive {
     opacity: 0.5;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+td {
+    width: 15px;
+    text-align: center;
+}
+
+#twbtn {
+    margin: 10px;
 }
