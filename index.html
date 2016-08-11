@@ -4,13 +4,91 @@
     <meta charset="utf8">
     <title>○× Time Attack</title>
     <link rel="stylesheet" href="mystyle.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script id="twitter-wjs" src="http://platform.twitter.com/widgets.js"></script>
 </head>
 <body>
-    <h1>○× Time Attack</h1>
-    <div id="board"></div>
-    <div id="result">Win: 0 Lose: 0 Draw: 0</div>
-    <div id="start" class="btn active">start</div>
-
+    <CENTER>
+        <h1>○× Time Attack</h1>
+        <div id="board"></div>
+        <div id="result">Win: 0 Lose: 0 Draw: 0</div>
+        <div id="start" class="btn active">start</div>
+        <p>(Press or Space Key)</p>
+        <div id="twbtn"></div>  <!-- TODO: 予め領域を確保しておく -->
+        <p>アルファベットキー
+            <table border="1">
+                <tbody>
+                    <tr>
+                        <td>Q</td><td>W</td><td>E</td>
+                    </tr>
+                    <tr>
+                        <td>A</td><td>S</td><td>D</td>
+                    </tr>
+                    <tr>
+                        <td>Z</td><td>X</td><td>C</td>
+                    </tr>
+                </tbody>
+            </table>
+        </p>
+        <p>テンキー(効かない場合はNumLockをオンに)
+            <table border="1">
+                <tbody>
+                    <tr>
+                        <td>7</td><td>8</td><td>9</td>
+                    </tr>
+                    <tr>
+                        <td>4</td><td>5</td><td>6</td>
+                    </tr>
+                    <tr>
+                        <td>1</td><td>2</td><td>3</td>
+                    </tr>
+                </tbody>
+            </table>
+        </p>
+        <!-- <ul>
+            <li>10秒間○×ゲームで勝ちまくるだけのゲームです</li>
+            <li>あなたが常に先手(○)です</li>
+            <li>キーボード操作もできます
+                <ul>
+                    <li>Spaceキー: スタート</li>
+                    <li>マスとの対応:
+                        <ul>
+                            <li>アルファベットキー
+                                <table border="1">
+                                    <tbody>
+                                        <tr>
+                                            <td>Q</td><td>W</td><td>E</td>
+                                        </tr>
+                                        <tr>
+                                            <td>A</td><td>S</td><td>D</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Z</td><td>X</td><td>C</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </li>
+                            <li>テンキー(効かない場合はNumLockをオンに)
+                                <table border="1">
+                                    <tbody>
+                                        <tr>
+                                            <td>7</td><td>8</td><td>9</td>
+                                        </tr>
+                                        <tr>
+                                            <td>4</td><td>5</td><td>6</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1</td><td>2</td><td>3</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </ul> -->
+    </CENTER>
     <script>
         (function() {
             "use strict";
@@ -23,11 +101,11 @@
             let tid_round;
             let cnt_win = 0, cnt_lose = 0, cnt_draw = 0;
 
-            // 盤面の状態を保持するオブジェクト
             // 盤面:
             // 0 1 2
             // 3 4 5
             // 6 7 8
+            // 盤面の状態を保持するオブジェクト
             let state = {
                 board: [],          // 各マスの状態
                 num_empty: 0,       // 空きマスの数
@@ -60,20 +138,44 @@
                 clearBoard();
 
                 // startボタンにイベントリスナーをつける
-                document.getElementById('start').addEventListener('click', function() {
-                    // btn が inactive の時は押しちゃダメ
-                    if (state.running) return;
-                    cnt_win = 0; cnt_lose = 0; cnt_draw = 0;
-                    updateResult();
-                    clearBoard();
-                    changeRunning(true);
-                    // TIME_LIMITミリ秒経過したら終了
-                    setTimeout(function() {
-                        clearTimeout(tid_round);    // 結果の一時表示中なら盤面は消さない
-                        finishGame();
-                    }, TIME_LIMIT);
-                });
+                document.getElementById('start').addEventListener('click', startBtnClicked);
+
+                // キーボード操作のためのイベントリスナー
+                document.onkeydown = function(e) {
+                    if (e.code === "Space")
+                        startBtnClicked();
+                    if (!state.running)
+                        return;
+                    let done;
+                    switch (e.code) {
+                        case "KeyQ": case "Numpad7": done = setState(0, "o"); break;
+                        case "KeyW": case "Numpad8": done = setState(1, "o"); break;
+                        case "KeyE": case "Numpad9": done = setState(2, "o"); break;
+                        case "KeyA": case "Numpad4": done = setState(3, "o"); break;
+                        case "KeyS": case "Numpad5": done = setState(4, "o"); break;
+                        case "KeyD": case "Numpad6": done = setState(5, "o"); break;
+                        case "KeyZ": case "Numpad1": done = setState(6, "o"); break;
+                        case "KeyX": case "Numpad2": done = setState(7, "o"); break;
+                        case "KeyC": case "Numpad3": done = setState(8, "o"); break;
+                    }
+                    if (done)
+                        nxtTurn();
+                }
             })();
+
+            function startBtnClicked() {
+                // btn が inactive の時は押しちゃダメ
+                if (state.running) return;
+                cnt_win = 0; cnt_lose = 0; cnt_draw = 0;
+                updateResult();
+                clearBoard();
+                changeRunning(true);
+                // TIME_LIMITミリ秒経過したら終了
+                setTimeout(function() {
+                    clearTimeout(tid_round);    // 結果の一時表示中なら盤面は消さない
+                    finishGame();
+                }, TIME_LIMIT);
+            }
 
             function clearBoard() {
                 // 盤面をまっさらにする
@@ -194,6 +296,14 @@
             function finishGame() {
                 console.log("Time Up!");
                 changeRunning(false);
+                // tweet内容の書き換え
+                // 参考: http://qiita.com/hidesuke/items/5234fd3b19061a53fcbd の最後
+                (function(){
+                    let text = "10秒で" + cnt_win + "勝" + cnt_lose + "敗" + cnt_draw + "分しました！";
+                    var button = '<a href="https://twitter.com/share" class="twitter-share-button" data-text="' + text +'" data-lang="ja" data-hashtags="oxTimeAttack">ツイート</a>';
+                    $('#twbtn').html(button);
+                    twttr.widgets.load();
+                })();
             }
 
         })();
